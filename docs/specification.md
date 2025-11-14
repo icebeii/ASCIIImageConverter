@@ -2,7 +2,7 @@
 
 Projekt bude konzolová aplikace, která převádí rastrový obrázek (.jpg, .png) do ASCII grafiky - textové reprezentace obrázku sestávající ze znaků.
 Program bude navržen tak, aby se spouštěl z příkazového řádku a umožňuje uživateli zadat různé parametry převodu, 
-jako je šířka výstupu, jas, kontrast, použití filtrů, název znakové sady a v případě potřeby i barevný výstup.
+jako je šířka výstupu, jas, kontrast, použití filtrů, název znakové sady a v případě potřeby i barevný výstup. 
 
 ### Příklady vstupů
 `ascii_converter photo.jpg --width 120 --brightness 15 --filter sepia`
@@ -23,9 +23,10 @@ jako je šířka výstupu, jas, kontrast, použití filtrů, název znakové sad
 
 ### Algoritmus
 1. Program načte vstupní soubor pomocí `stb_image.h` a uloží data pixelů do paměti.
-2. Pokud je zadán parametr `--wisth`, proběhne downsampling nebo upsampling pomocí bilineární interpolace.
+2. Pokud je zadán parametr `--width`, proběhne downsampling nebo upsampling pomocí bilineární interpolace.
 Uživatel určuje cílovou šířku, výška se dopočítá automaticky podle poměru stran.
-3. Pokud jsou zadány parametry `--brightness`, `--contrast` nebo `--filter` algoritmus provede odpovídající změny v obrázku.
+3. Pokud jsou zadány parametry `--brightness`, `--contrast` nebo `--filter` algoritmus provede odpovídající změny v obrázku.  
+    - Jako jeden z filtrů také bude implementován jeden z algoritmů počítačového vidění, například skeletonizace, detekce hran, detekce rohu nebo morfologické operátory.
 4. Převod obrázku do grayscale: `grayscale = 0.3*R + 0.59*G + 0.11*B` (Luminosity method)
 5. Jas každého pixelu je namapován na symbol ze sady určené uživatelem pomocí parametru `--set`.
 Pokud je zadán parametr `--color`, pak se barva každého znaku určí také na základě průměrné hodnoty pixelů v dané oblasti.
@@ -38,6 +39,12 @@ Po spuštění s parametrem --interactive program vstoupí do režimu, kde lze z
 `> filter sepia`
 
 `> color on`
+
+Pro pohodlnější interakci budou přidány také operace undo a redo:
+
+`> undo`
+
+`> redo`
 
 Výsledek se okamžitě zaktualizuje a znovu vykreslí v konzoli.
 
