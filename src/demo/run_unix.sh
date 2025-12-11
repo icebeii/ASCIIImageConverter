@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./demo/build
+./build/demo
