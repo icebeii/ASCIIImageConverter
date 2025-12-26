@@ -1,0 +1,21 @@
+#pragma once
+
+# include <vector>
+
+// Structure representing a single RGB pixel
+struct RGB {
+	unsigned char r;	// Red component
+	unsigned char g;	// Green component
+	unsigned char b;	// Blue component 
+};
+
+// Class representing an image
+class Image {
+public:
+	int width = 0;				/// Image width in pixels
+	int height = 0;				// Image height in pixels
+	int channels = 3;			// Number of color channels
+
+	// Vector storing all pixels of the image
+	std::vector<RGB> pixels;	// Current pixel data of the image
+};

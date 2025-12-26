@@ -4,18 +4,21 @@
 #include <stdexcept>
 #include <cstdlib>
 
+// Returns true if an argument starts with "--"
 bool ArgsParser::isFlag(const std::string& arg) {
 	return arg.rfind("--", 0) == 0;
 }
 
+// Parses command-line arguments and returns an Argument struct
 Arguments ArgsParser::parse(int argc, char** argv) {
 	if (argc < 2) {
 		throw std::invalid_argument("No input file specified");
 	}
 
 	Arguments args;
-	args.inputFile = argv[1];
+	args.inputFile = argv[1];	// The first argument is the input file
 
+	// Handle other arguments
 	for (int i = 2; i < argc; i++) {
 		std::string current = argv[i];
 		if (!isFlag(current)) {
