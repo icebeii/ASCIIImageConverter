@@ -1,0 +1,68 @@
+#include "ASCIIConverter.h"
+
+// Predefined character sets used for ASCII conversion
+// Characters are ordered from darkest to lightest
+const std::unordered_map<std::string, std::string> ASCIIConverter::charsets = {
+	{"default", "@%#*+=-:. "}
+};
+
+// Constructor
+ASCIIConverter::ASCIIConverter(const Image& img) : image(img){}
+
+std::string ASCIIConverter::convert(const std::string& charsetName) const {
+	const int blockWidth = 4;
+	const int blockHeight = 8;
+	std::string result;
+
+    std::string charset = getCharset(charsetName);
+
+	for (int y = 0; y < image.height; y += blockHeight) {
+		for (int x = 0; x < image.width; x += blockWidth) {
+
+            int sum = 0;
+            int count = 0;
+            for (int dy = 0; dy < blockHeight; dy++)
+            {
+                for (int dx = 0; dx < blockWidth; dx++)
+                {
+                    int px = x + dx;
+                    int py = y + dy;
+
+                    if (px >= image.width || py >= image.height) {
+                        continue;
+                    }
+                    const RGB& p = image.pixels[py * image.width + px];
+                    int gray = 0.3 * p.r + 0.59 * p.g + 0.11 * p.b;
+                    sum += gray;
+                    count++;
+                }
+            }
+            int avgGray = sum / count;
+            int index = avgGray * (charset.size() - 1) / 255;
+
+            result += charset[index];
+		}
+        result += '\n';
+	}
+	return result;
+}
+
+// Prints the ASCII result to the given output stream
+void ASCIIConverter::print(const std::string& result, std::ostream& out) const {
+    out << result;
+}
+
+// Returns the character set for the given name
+// Throws an exception if the charset does not exist
+const std::string ASCIIConverter::getCharset(const std::string& title)
+{
+    auto it = charsets.find(title);
+    if (it != charsets.end()) {
+        std::string value = it->second;
+        return value;
+    }
+    else {
+        throw new std::runtime_error("Invalid charset");
+    }
+}
+

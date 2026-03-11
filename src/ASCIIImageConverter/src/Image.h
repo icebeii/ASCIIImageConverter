@@ -12,7 +12,7 @@ struct RGB {
 // Class representing an image
 class Image {
 public:
-	int width = 0;				/// Image width in pixels
+	int width = 0;				// Image width in pixels
 	int height = 0;				// Image height in pixels
 	int channels = 3;			// Number of color channels
 

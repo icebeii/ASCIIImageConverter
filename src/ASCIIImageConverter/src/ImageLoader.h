@@ -9,5 +9,5 @@ public:
 	// Loads an image from file
 	//	filename - path to an image file
 	// Returns an Image object
-	static Image loadFromFile(const std::string& filename)
+	static Image loadFromFile(const std::string& filename);
 };
