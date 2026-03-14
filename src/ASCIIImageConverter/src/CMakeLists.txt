@@ -9,6 +9,7 @@ add_executable(ascii_converter
     "main.cpp"
  "ArgsParser.cpp" "ArgsParser.h"
  "ImageLoader.cpp" "ImageLoader.h"
+ "ImageProcessor.cpp" "ImageProcessor.h"
  "ASCIIConverter.cpp" "ASCIIConverter.h")
 
 target_include_directories(ascii_converter PRIVATE

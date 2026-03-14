@@ -33,8 +33,11 @@ int main(int argc, char** argv)
 
         std::cout << "Image uploaded" << std::endl;
         std::cout << "Size: " << img.width << " x " << img.height << std::endl;
-        ASCIIConverter converter(img);
-        std::string res = converter.convert("default");
+        ImageProcessor processor(img);
+        Image newImg = processor.resize(img, 800);
+        //newImg = processor.sepia(newImg);
+        ASCIIConverter converter(newImg);
+        std::string res = converter.convert("default", true);
         converter.print(res, std::cout);
     }
     catch (const std::exception& e) {

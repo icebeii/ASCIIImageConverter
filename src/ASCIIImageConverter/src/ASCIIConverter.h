@@ -14,8 +14,9 @@ public:
 
 	// Converts an image to an ASCII string using the specified character set
 	//	charsetName - name of the character set used for conversion
+	//  color - if true, ANSI color codes will be added 
 	// Returns a string containing an ASCII representation of the image
-	std::string convert(const std::string& charsetName) const;
+	std::string convert(const std::string& charsetName, bool color) const;
 
 	// Prints the ASCII result to the provided output stream
 	//	result - ASCII string produced by convert()
