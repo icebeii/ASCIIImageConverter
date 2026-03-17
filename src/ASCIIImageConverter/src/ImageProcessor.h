@@ -3,6 +3,7 @@
 #include "Image.h"
 #include "ArgsParser.h"
 #include <string>
+#include <vector>
 
 // Class responsible for processing and modifiying an image
 class ImageProcessor {
@@ -29,6 +30,16 @@ public:
 	// Returns an image with sepia color filter
 	Image sepia(const Image& img);
 
+	// Applies a Gaussian blur effect to the image
+	//	img - input image
+	// Returns a blurred image
+	Image blur(const Image& img);
+
+	// Applies a sharpening effect to the image
+	//	img - input image
+	// Returns a sharpened image
+	Image sharpen(const Image& img);
+
 	// Returns a reference to the processed image
 	Image& getImage();
 
@@ -36,5 +47,11 @@ private:
 	Image& image;	// Reference to the image
 
 	Image grayscale(const Image& img);
-	
+
+	// Applies a convolution kernel to the image
+	//	img - input image
+	//	kernel - 2D vector which represents the filter matrix
+	//	divisor - sum of kernel elements 
+	// Returns an iamge after applying the kernel
+	Image applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel, int divisor);
 };

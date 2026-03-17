@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     return 0;
     */
     try {
-        std::string filename = "example.jpg";
+        std::string filename = "fruits.jpg";
         std::string path = std::string(DATA_DIR) + "/" + filename;
 
         Image img = ImageLoader::loadFromFile(path.c_str());
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
         std::cout << "Size: " << img.width << " x " << img.height << std::endl;
         ImageProcessor processor(img);
         Image newImg = processor.resize(img, 800);
-        //newImg = processor.sepia(newImg);
+        newImg = processor.sharpen(newImg);
         ASCIIConverter converter(newImg);
         std::string res = converter.convert("default", true);
         converter.print(res, std::cout);

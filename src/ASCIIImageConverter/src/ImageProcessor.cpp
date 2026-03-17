@@ -27,6 +27,53 @@ Image ImageProcessor::grayscale(const Image& img)
 	return gray;
 }
 
+// Applies a convolution kernel to the image
+// Each pixel is replaced by a weighted sum of its neighbors defined by kernel
+Image ImageProcessor::applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel, int divisor)
+{
+	Image result = img;
+
+	for (int y = 0; y < img.height; y++) {
+		for (int x = 0; x < img.width; x++) {
+			int sumR = 0;
+			int sumG = 0;
+			int sumB = 0;
+
+			for (int dy = -1; dy < 1; dy++) {
+				for (int dx = -1; dx < 1; dx++) {
+					int nx = x + dx;
+					int ny = y + dy;
+
+					// Stay inside the image boundaries
+					nx = std::max(0, std::min(nx, img.width - 1));
+					ny = std::max(0, std::min(ny, img.height - 1));
+
+					int weight = kernel[dy+1][dx+1];
+					const RGB& p = img.pixels[ny * img.width + nx];
+
+					sumR += p.r * weight;
+					sumG += p.g * weight;
+					sumB += p.b * weight;
+				}
+			}
+
+			RGB& np = result.pixels[y * img.width + x];
+
+			if (divisor != 0) {
+				sumR /= divisor;
+				sumG /= divisor;
+				sumB /= divisor;
+			}
+			
+
+			np.r = std::min(255, std::max(0, sumR));
+			np.g = std::min(255, std::max(0, sumG));
+			np.b = std::min(255, std::max(0, sumB));
+		}
+	}
+	return result;
+}
+
 // Resizes an image using bilinear interpolation
 Image ImageProcessor::resize(const Image& img, int newWidth)
 {
@@ -124,4 +171,29 @@ Image ImageProcessor::sepia(const Image& img)
 		}
 	}
 	return result;
+}
+
+// Applies a Gaussian blur
+Image ImageProcessor::blur(const Image& img) {
+	// 3x3 Gaussian kernel
+	std::vector<std::vector<int>> kernel = {
+		{1, 2, 1},		
+		{2, 4, 2},
+		{1, 2, 1}
+	};
+
+	return applyKernel(img, kernel, 16);
+}
+
+// Applies a sharpening effect
+Image ImageProcessor::sharpen(const Image& img)
+{
+	// 3x3 sharpening kernel
+	std::vector<std::vector<int>> kernel = {
+		{0, -1, 0},
+		{-1, 5, -1},
+		{0, -1, 0}
+	};
+
+	return applyKernel(img, kernel, 1);
 }
