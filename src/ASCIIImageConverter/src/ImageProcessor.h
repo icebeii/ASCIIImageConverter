@@ -4,6 +4,7 @@
 #include "ArgsParser.h"
 #include <string>
 #include <vector>
+#include <cmath>
 
 // Class responsible for processing and modifiying an image
 class ImageProcessor {
@@ -40,6 +41,13 @@ public:
 	// Returns a sharpened image
 	Image sharpen(const Image& img);
 
+	Image adjustBrightness(const Image& img, float factor);
+
+	Image adjustContrast(const Image& img, float factor);
+
+	// Canny
+	Image detectEdges(const Image& img);
+
 	// Returns a reference to the processed image
 	Image& getImage();
 
@@ -54,4 +62,8 @@ private:
 	//	divisor - sum of kernel elements 
 	// Returns an iamge after applying the kernel
 	Image applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel, int divisor);
+
+	void computeGradient(const Image& img, std::vector<float>& magnitude, std::vector<float>& direction);
+	std::vector<float> suppress(const std::vector<float>& magnitude, const std::vector<float>& direction, int width, int height);
+	Image doubleThreshold(const std::vector<float>& magnitude, int width, int height);
 };

@@ -35,7 +35,7 @@ int main(int argc, char** argv)
         std::cout << "Size: " << img.width << " x " << img.height << std::endl;
         ImageProcessor processor(img);
         Image newImg = processor.resize(img, 800);
-        newImg = processor.sharpen(newImg);
+        newImg = processor.detectEdges(newImg);
         ASCIIConverter converter(newImg);
         std::string res = converter.convert("default", true);
         converter.print(res, std::cout);

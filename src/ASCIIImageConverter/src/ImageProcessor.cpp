@@ -74,6 +74,93 @@ Image ImageProcessor::applyKernel(const Image& img, const std::vector<std::vecto
 	return result;
 }
 
+void ImageProcessor::computeGradient(const Image& img, std::vector<float>& magnitude, std::vector<float>& direction)
+{
+	int width = img.width;
+	int height = img.height;
+	magnitude.resize(width * height);
+	direction.resize(width * height);
+
+	int Gx[3][3] = {
+		{-1, 0, 1},
+		{-2, 0, 2},
+		{-1, 0, 1}
+	};
+	int Gy[3][3] = {
+		{-1, -2, -1},
+		{0, 0, 0},
+		{1, 2, 1}
+	};
+
+	for (int y = 1; y < height - 1; y++) {
+		for (int x = 1; x < width - 1; x++) {
+			float sumX = 0; 
+			float sumY = 0;
+
+			for (int dy = -1; dy <= 1; dy++) {
+				for (int dx = -1; dx <= 1; dx++) {
+					const RGB& p = img.pixels[(y + dy) * width + (x + dx)];
+					float gray = (p.r + p.g + p.b) / 3.0f;
+					sumX += gray * Gx[dy + 1][dx + 1];
+					sumY += gray * Gy[dy + 1][dx + 1];
+				}
+			}
+			int idx = y * width + x;
+			magnitude[idx] = std::sqrt(sumX * sumX + sumY * sumY);
+			direction[idx] = std::atan2(sumY, sumX);
+		}
+	}
+}
+
+std::vector<float> ImageProcessor::suppress(const std::vector<float>& magnitude, const std::vector<float>& direction, int width, int height)
+{
+	std::vector<float> result(width * height, 0);
+
+	for (int y = 1; y < height - 1; y++) {
+		for (int x = 1; x < width - 1; x++) {
+			int i = y * width + x;
+
+			float angle = direction[i];
+			float m = magnitude[i];
+
+			float m1 = magnitude[i - 1];
+			float m2 = magnitude[i + 1];
+			if (m >= m1 && m >= m2) {
+				result[i] = m;
+			}
+			else {
+				result[i] = 0;
+			}
+		}
+	}
+	return result;
+}
+
+Image ImageProcessor::doubleThreshold(const std::vector<float>& magnitude, int width, int height)
+{
+	Image result;
+	result.width = width;
+	result.height = height;
+	result.pixels.resize(width * height);
+
+	float low = 30.0f;
+	float high = 100.0f;
+	for (int i = 0; i < width * height; i++) {
+		RGB p; 
+		if (magnitude[i] >= high) {
+			p = { 255, 255, 255 };
+		}
+		else if (magnitude[i] >= low) {
+			p = { 100, 100, 100 };
+		}
+		else {
+			p = { 0,0,0 };
+		}
+		result.pixels[i] = p;
+	}
+	return result;
+}
+
 // Resizes an image using bilinear interpolation
 Image ImageProcessor::resize(const Image& img, int newWidth)
 {
@@ -196,4 +283,40 @@ Image ImageProcessor::sharpen(const Image& img)
 	};
 
 	return applyKernel(img, kernel, 1);
+}
+
+Image ImageProcessor::adjustBrightness(const Image& img, float factor) {
+	Image result = img;
+
+	for (int i = 0; i < img.width * img.height; i++) {
+		RGB& p = result.pixels[i];
+		p.r = static_cast<int>(std::min(255.0f, std::max(0.0f, p.r * (1.0f + factor))));
+		p.g = static_cast<int>(std::min(255.0f, std::max(0.0f, p.g * (1.0f + factor))));
+		p.b = static_cast<int>(std::min(255.0f, std::max(0.0f, p.b * (1.0f + factor))));
+	}
+	return result;
+}
+
+Image ImageProcessor::adjustContrast(const Image& img, float factor)
+{
+	Image result = img;
+
+	for (int i = 0; i < img.width * img.height; i++) {
+		RGB& p = result.pixels[i];
+		p.r = static_cast<int>(std::min(255.0f, std::max(0.0f, (p.r - 128.0f) * factor + 128.0f)));
+		p.g = static_cast<int>(std::min(255.0f, std::max(0.0f, (p.g - 128.0f) * factor + 128.0f)));
+		p.b = static_cast<int>(std::min(255.0f, std::max(0.0f, (p.b - 128.0f) * factor + 128.0f)));
+	}
+	return result;
+}
+
+Image ImageProcessor::detectEdges(const Image& img)
+{
+	Image blurred = blur(img);
+	std::vector<float> magnitude;
+	std::vector<float> direction;
+
+	computeGradient(blurred, magnitude, direction);
+	std::vector<float> suppressed = suppress(magnitude, direction, img.width, img.height);
+	return doubleThreshold(suppressed, img.width, img.height);
 }
