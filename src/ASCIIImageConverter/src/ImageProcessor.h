@@ -3,7 +3,6 @@
 #include "Image.h"
 #include "ArgsParser.h"
 #include <string>
-#include <vector>
 #include <cmath>
 
 // Class responsible for processing and modifiying an image
@@ -13,7 +12,7 @@ public:
 	// The processor will operate directly on this image
 	explicit ImageProcessor(Image& img);
 
-	void processArgs(const Arguments& args);
+	Image processArgs(const Arguments& args);
 
 	// Resize an image to the specified width, height is computed automatically
 	//	img - input image
@@ -41,11 +40,21 @@ public:
 	// Returns a sharpened image
 	Image sharpen(const Image& img);
 
+	// Adjusts image brightness
+	//	img - input image
+	//	factor > 0 to increase, factor < 0 to decrease
+	// Returns corrected image
 	Image adjustBrightness(const Image& img, float factor);
 
+	// Adjusts image contrast
+	//	img - input image
+	//	factor > 1 to increase, 0 < factor < 1 to decrease
+	// Returns corrected image
 	Image adjustContrast(const Image& img, float factor);
 
-	// Canny
+	// Canny image detection
+	//	img - input image
+	// Returns black image with white edges
 	Image detectEdges(const Image& img);
 
 	// Returns a reference to the processed image
@@ -63,7 +72,22 @@ private:
 	// Returns an iamge after applying the kernel
 	Image applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel, int divisor);
 
+	// Computes gradient magnitude and direction using Sobel operators
+	//	img - input image
+	//	magnitude - output vectors of gradient strengths
+	//	direction - output vector of gradient angles in radians
 	void computeGradient(const Image& img, std::vector<float>& magnitude, std::vector<float>& direction);
+
+	// Non-maximum suppression
+	//	magnitude - gradient magnitudes
+	//	direction - gradient directions
+	//	width, height - image dimensions
+	// Returns a vector with suppressed edge magnitudes
 	std::vector<float> suppress(const std::vector<float>& magnitude, const std::vector<float>& direction, int width, int height);
-	Image doubleThreshold(const std::vector<float>& magnitude, int width, int height);
+
+	// Applies hysteresis thresholding to detect final edges
+	//	magnitude - suppressed gradient magnitudes
+	//	width, height - dimension of an image
+	// Returns a binary image with detected edges
+	Image hysteresis(const std::vector<float>& magnitude, int width, int height);
 };

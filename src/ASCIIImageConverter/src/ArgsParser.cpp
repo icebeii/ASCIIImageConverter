@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <cstdlib>
 
+const std::string ArgsParser::dataPrefix = "DATADIR";
+
 // Returns true if an argument starts with "--"
 bool ArgsParser::isFlag(const std::string& arg) {
 	return arg.rfind("--", 0) == 0;
@@ -15,8 +17,14 @@ Arguments ArgsParser::parse(int argc, char** argv) {
 		throw std::invalid_argument("No input file specified");
 	}
 
-	Arguments args;
-	args.inputFile = argv[1];	// The first argument is the input file
+	Arguments args;	
+	std::string inputPath = argv[1];	// The first argument is the input file
+	if (inputPath.rfind(dataPrefix, 0) == 0) {
+		args.inputFile = std::string(DATA_DIR) + "/" + inputPath.substr(dataPrefix.size());
+	}
+	else {
+		args.inputFile = inputPath;
+	}
 
 	// Handle other arguments
 	for (int i = 2; i < argc; i++) {
@@ -47,7 +55,7 @@ Arguments ArgsParser::parse(int argc, char** argv) {
 				throw std::invalid_argument("--brightness requires a value");
 			}
 			try {
-				args.contrast = std::stoi(argv[++i]);
+				args.brightness = std::stoi(argv[++i]);
 			}
 			catch (const std::exception&) {
 				throw std::invalid_argument("--brightness value must be an integer");

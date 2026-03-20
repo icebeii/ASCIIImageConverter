@@ -3,8 +3,35 @@
 // Constructor 
 ImageProcessor::ImageProcessor(Image& img) : image(img) {}
 
-void ImageProcessor::processArgs(const Arguments& args) {
+Image ImageProcessor::processArgs(const Arguments& args) {
+	if (args.width > 0) {
+		image = resize(image, args.width);
+	}
+	if (args.brightness != 0.0f) {
+		image = adjustBrightness(image, args.brightness);
+	}
+	if (args.contrast != 1.0f) {
+		image = adjustContrast(image, args.contrast);
+	}
 
+	for (const std::string& filter : args.filters) {
+		if (filter == "invert") {
+			image = invert(image);
+		}
+		else if (filter == "sepia") {
+			image = sepia(image);
+		}
+		else if (filter == "blur") {
+			image = blur(image);
+		}
+		else if (filter == "sharpen") {
+			image = sharpen(image);
+		}
+		else if (filter == "edges") {
+			image = detectEdges(image);
+		}
+	}
+	return image;
 }
 
 // Returns a reference to the image
@@ -74,6 +101,8 @@ Image ImageProcessor::applyKernel(const Image& img, const std::vector<std::vecto
 	return result;
 }
 
+// Computes gradient magnitude and direction
+// Converts image to grayscale and computes intensity changes
 void ImageProcessor::computeGradient(const Image& img, std::vector<float>& magnitude, std::vector<float>& direction)
 {
 	int width = img.width;
@@ -81,6 +110,7 @@ void ImageProcessor::computeGradient(const Image& img, std::vector<float>& magni
 	magnitude.resize(width * height);
 	direction.resize(width * height);
 
+	// Sobel kernels for horizontal and vertical gradients
 	int Gx[3][3] = {
 		{-1, 0, 1},
 		{-2, 0, 2},
@@ -112,6 +142,8 @@ void ImageProcessor::computeGradient(const Image& img, std::vector<float>& magni
 	}
 }
 
+// Non-maximum suppression
+// Keeps only pixels that are local maxima along the gradient directon
 std::vector<float> ImageProcessor::suppress(const std::vector<float>& magnitude, const std::vector<float>& direction, int width, int height)
 {
 	std::vector<float> result(width * height, 0);
@@ -120,11 +152,32 @@ std::vector<float> ImageProcessor::suppress(const std::vector<float>& magnitude,
 		for (int x = 1; x < width - 1; x++) {
 			int i = y * width + x;
 
-			float angle = direction[i];
+			float angle = direction[i] * 180.0f / 3.14159265f;
+			if (angle < 0) {
+				angle += 180;
+			}
 			float m = magnitude[i];
+			float m1 = 0;
+			float m2 = 0;
 
-			float m1 = magnitude[i - 1];
-			float m2 = magnitude[i + 1];
+			// Select neighboring pixels based on gradient dircetion
+			if ((angle >= 0 && angle <= 22.5) || (angle >= 157.5 && angle <= 180)) {
+				m1 = magnitude[i - 1];
+				m2 = magnitude[i + 1];
+			}
+			else if (angle >= 22.5 && angle < 67.5) {
+				m1 = magnitude[(y - 1) * width + (x + 1)];
+				m2 = magnitude[(y + 1) * width + (x - 1)];
+			}
+			else if (angle >= 67.5 && angle < 112.5) {
+				m1 = magnitude[(y - 1) * width + x];
+				m2 = magnitude[(y + 1) * width + x];
+			}
+			else if (angle >= 112.5 && angle < 157.5) {
+				m1 = magnitude[(y - 1) * width + (x - 1)];
+				m2 = magnitude[(y + 1) * width + (x + 1)];
+			}
+
 			if (m >= m1 && m >= m2) {
 				result[i] = m;
 			}
@@ -136,27 +189,67 @@ std::vector<float> ImageProcessor::suppress(const std::vector<float>& magnitude,
 	return result;
 }
 
-Image ImageProcessor::doubleThreshold(const std::vector<float>& magnitude, int width, int height)
+// Hysteresis thresholding
+// Weak edges are kept only if connected to strong ones
+Image ImageProcessor::hysteresis(const std::vector<float>& magnitude, int width, int height)
 {
 	Image result;
 	result.width = width;
 	result.height = height;
 	result.pixels.resize(width * height);
 
+	// Threshold values
 	float low = 30.0f;
 	float high = 100.0f;
+
+	std::vector<int> state(width * height, 0); // 0 - non-edge, 1 - weak, 2 - strong
+
 	for (int i = 0; i < width * height; i++) {
-		RGB p; 
 		if (magnitude[i] >= high) {
-			p = { 255, 255, 255 };
+			state[i] = 2;
 		}
 		else if (magnitude[i] >= low) {
-			p = { 100, 100, 100 };
+			state[i] = 1;
+		}
+	}
+
+	std::vector<int> stack;
+	for (int i = 0; i < width * height; i++) {
+		if (state[i] == 2) {
+			stack.push_back(i);
+
+			// DFS to connect weak edges
+			while (!stack.empty()) {
+				int curr = stack.back();
+				stack.pop_back();
+				int x = curr % width;
+				int y = curr / width;
+
+				for (int dy = -1; dy <= 1; dy++) {
+					for (int dx = -1; dx <= 1; dx++) {
+						int nx = x + dx;
+						int ny = y + dy;
+
+						if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+							int ni = ny * width + nx;
+							if (state[ni] == 1) {
+								state[ni] = 2;
+								stack.push_back(ni);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < width * height; i++) {
+		if (state[i] == 2) {
+			result.pixels[i] = { 255, 255, 255 };
 		}
 		else {
-			p = { 0,0,0 };
+			result.pixels[i] = {0, 0, 0};
 		}
-		result.pixels[i] = p;
 	}
 	return result;
 }
@@ -285,6 +378,7 @@ Image ImageProcessor::sharpen(const Image& img)
 	return applyKernel(img, kernel, 1);
 }
 
+// Adjusts brightness
 Image ImageProcessor::adjustBrightness(const Image& img, float factor) {
 	Image result = img;
 
@@ -297,6 +391,7 @@ Image ImageProcessor::adjustBrightness(const Image& img, float factor) {
 	return result;
 }
 
+// Adjusts contrast
 Image ImageProcessor::adjustContrast(const Image& img, float factor)
 {
 	Image result = img;
@@ -310,6 +405,7 @@ Image ImageProcessor::adjustContrast(const Image& img, float factor)
 	return result;
 }
 
+// Full Canny edge detection pipeline
 Image ImageProcessor::detectEdges(const Image& img)
 {
 	Image blurred = blur(img);
@@ -318,5 +414,5 @@ Image ImageProcessor::detectEdges(const Image& img)
 
 	computeGradient(blurred, magnitude, direction);
 	std::vector<float> suppressed = suppress(magnitude, direction, img.width, img.height);
-	return doubleThreshold(suppressed, img.width, img.height);
+	return hysteresis(suppressed, img.width, img.height);
 }

@@ -8,6 +8,7 @@ struct Arguments {
 	std::string inputFile;				// Input file name
 	int width = 0;						// Output width
 	float contrast = 1.0f;				// Image contrast
+	float brightness = 0.0f;			// Image brightness
 	std::vector<std::string> filters;	// List of filters to apply
 	std::string charset = "default";	// Character set for output
 	bool color = false;					// Flag to enable color output
@@ -29,4 +30,5 @@ private:
 	//	arg - input string
 	// Returns true if arg is a flag, false otherwise
 	static bool isFlag(const std::string& arg);
+	static const std::string dataPrefix;
 };
