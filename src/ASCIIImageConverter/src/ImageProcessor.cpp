@@ -54,11 +54,24 @@ Image ImageProcessor::grayscale(const Image& img)
 	return gray;
 }
 
+int ImageProcessor::calculateSum(const std::vector<std::vector<int>>& kernel)
+{
+	int sum = 0;
+
+	for (const auto& row : kernel) {
+		for (int value : row) {
+			sum += value;
+		}
+	}
+	return sum;
+}
+
 // Applies a convolution kernel to the image
 // Each pixel is replaced by a weighted sum of its neighbors defined by kernel
-Image ImageProcessor::applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel, int divisor)
+Image ImageProcessor::applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel)
 {
 	Image result = img;
+	int divisor = calculateSum(kernel);
 
 	for (int y = 0; y < img.height; y++) {
 		for (int x = 0; x < img.width; x++) {
@@ -362,7 +375,7 @@ Image ImageProcessor::blur(const Image& img) {
 		{1, 2, 1}
 	};
 
-	return applyKernel(img, kernel, 16);
+	return applyKernel(img, kernel);
 }
 
 // Applies a sharpening effect
@@ -375,7 +388,7 @@ Image ImageProcessor::sharpen(const Image& img)
 		{0, -1, 0}
 	};
 
-	return applyKernel(img, kernel, 1);
+	return applyKernel(img, kernel);
 }
 
 // Adjusts brightness

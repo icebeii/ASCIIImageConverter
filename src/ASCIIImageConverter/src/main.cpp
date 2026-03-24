@@ -19,8 +19,9 @@ int main(int argc, char** argv)
         ImageProcessor processor(image);
         Image newImg = processor.processArgs(args);
         ASCIIConverter converter(newImg);
-        std::string res = converter.convert("default", args.color);
-        converter.print(res, std::cout);
+        std::string res = converter.convert(args.charset, args.color);
+        std::ostream& out = converter.getOutputStream(args.outputFile);
+        converter.print(res, out);
     }
     catch (const std::exception& e) {
         printError(e.what());

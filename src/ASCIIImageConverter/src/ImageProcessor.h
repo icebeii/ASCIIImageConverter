@@ -5,89 +5,135 @@
 #include <string>
 #include <cmath>
 
-// Class responsible for processing and modifiying an image
+/// Class responsible for processing and modifiying an image
 class ImageProcessor {
 public:
-	// Constructor that takes a reference to an Image object
-	// The processor will operate directly on this image
+	/**
+	* Constructor that takes a reference to an Image object
+	* The processor will operate directly on this image
+	*/
 	explicit ImageProcessor(Image& img);
 
 	Image processArgs(const Arguments& args);
 
-	// Resize an image to the specified width, height is computed automatically
-	//	img - input image
-	//	newWidth - new width in pixels
-	// Returns a resized image
+	/**
+	* Resizes an image to the specified width, height is computed automatically
+	* 
+	* @param img - input image
+	* @param newWidth - new width in pixels
+	* @retutn a resized image
+	*/
 	Image resize(const Image& img, int newWidth);
 
-	// Inverts all RGB color channels
-	//	img - input image
-	// Returns a negative image
+	/**
+	* Inverts all RGB color channels
+	* 
+	* @param img - input image
+	* @retutn a negative image
+	*/
 	Image invert(const Image& img);
 
-	// Applies a sepia tone effect using a standart sepia color transform
-	//	img - input image
-	// Returns an image with sepia color filter
+	/**
+	* Applies a sepia tone effect using a standart sepia color transform
+	* 
+	* @param img - input image
+	* @return an image with sepia color filter
+	*/
 	Image sepia(const Image& img);
 
-	// Applies a Gaussian blur effect to the image
-	//	img - input image
-	// Returns a blurred image
+	/**
+	* Applies a Gaussian blur effect to the image
+	* 
+	* @param img - input image
+	* @return a blurred image
+	*/
 	Image blur(const Image& img);
 
-	// Applies a sharpening effect to the image
-	//	img - input image
-	// Returns a sharpened image
+	/**
+	* Applies a sharpening effect to the image
+	* 
+	* @param img - input image
+	* @return a sharpened image
+	*/
 	Image sharpen(const Image& img);
 
-	// Adjusts image brightness
-	//	img - input image
-	//	factor > 0 to increase, factor < 0 to decrease
-	// Returns corrected image
+	/**
+	* Adjusts image brightness
+	* 
+	* @param img - input image
+	* @param factor > 0 to increase, factor < 0 to decrease
+	* @return corrected image
+	*/
 	Image adjustBrightness(const Image& img, float factor);
 
-	// Adjusts image contrast
-	//	img - input image
-	//	factor > 1 to increase, 0 < factor < 1 to decrease
-	// Returns corrected image
+	/**
+	* Adjusts image contrast
+	* 
+	* @param img - input image
+	* @param factor > 1 to increase, 0 < factor < 1 to decrease
+	* @return corrected image
+	*/
 	Image adjustContrast(const Image& img, float factor);
 
-	// Canny image detection
-	//	img - input image
-	// Returns black image with white edges
+	/**
+	* Detects edges using Canny algorithm
+	* 
+	* @param img - input image
+	* @return black image with white edges 
+	*/
 	Image detectEdges(const Image& img);
 
-	// Returns a reference to the processed image
+	/// Returns a reference to the processed image
 	Image& getImage();
 
 private:
-	Image& image;	// Reference to the image
+	/// Reference to the image
+	Image& image;	
 
 	Image grayscale(const Image& img);
 
-	// Applies a convolution kernel to the image
-	//	img - input image
-	//	kernel - 2D vector which represents the filter matrix
-	//	divisor - sum of kernel elements 
-	// Returns an iamge after applying the kernel
-	Image applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel, int divisor);
+	/**
+	* Calculates sum of kernel elements
+	* 
+	* @param kernel - input matrix
+	* @return sum of kernel elements
+	*/
+	int calculateSum(const std::vector<std::vector<int>>& kernel);
 
-	// Computes gradient magnitude and direction using Sobel operators
-	//	img - input image
-	//	magnitude - output vectors of gradient strengths
-	//	direction - output vector of gradient angles in radians
+	/**
+	* Applies a convolution kernel to the image
+	* 
+	* @param img - input image
+	* @param kernel - 2D vector which represents the filter matrix
+	* @return an iamge after applying the kernel
+	*/
+	Image applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel);
+
+	/**
+	* Computes gradient magnitude and direction using Sobel operators
+	* 
+	* @param img - input image
+	* @param magnitude - output vectors of gradient strengths
+	* @param direction - output vector of gradient angles in radians
+	*/
 	void computeGradient(const Image& img, std::vector<float>& magnitude, std::vector<float>& direction);
 
-	// Non-maximum suppression
-	//	magnitude - gradient magnitudes
-	//	direction - gradient directions
-	//	width, height - image dimensions
-	// Returns a vector with suppressed edge magnitudes
+	/**
+	* Performs non-maximum suppression
+	* 
+	* @param magnitude - gradient magnitudes
+	* @param direction - gradient directions
+	* @param width, height - image dimensions
+	* @return  a vector with suppressed edge magnitudes
+	*/
 	std::vector<float> suppress(const std::vector<float>& magnitude, const std::vector<float>& direction, int width, int height);
 
-	// Applies hysteresis thresholding to detect final edges
-	//	magnitude - suppressed gradient magnitudes
-	//	width, height - dimension of an image
-	// Returns a binary image with detected edges
+	/**
+	* Applies hysteresis thresholding to detect final edges
+	* 
+	* @param magnitude - suppressed gradient magnitudes
+	* @param width, height - image dimensions
+	* @return a binary image with detected edges
+	*/
 	Image hysteresis(const std::vector<float>& magnitude, int width, int height);
 };

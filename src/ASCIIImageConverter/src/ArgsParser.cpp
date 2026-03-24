@@ -18,6 +18,9 @@ Arguments ArgsParser::parse(int argc, char** argv) {
 	}
 
 	Arguments args;	
+	const std::vector<std::string> charsets = {
+		"default", "detailed", "alpha", "num", "minimalist", "alnum"
+	};
 	std::string inputPath = argv[1];	// The first argument is the input file
 	if (inputPath.rfind(dataPrefix, 0) == 0) {
 		args.inputFile = std::string(DATA_DIR) + "/" + inputPath.substr(dataPrefix.size());
@@ -91,7 +94,12 @@ Arguments ArgsParser::parse(int argc, char** argv) {
 			if ((i + 1) >= argc) {
 				throw std::invalid_argument("--set requires a value");
 			}
-			args.charset = argv[++i];
+			std::string charset = argv[++i];
+
+			if (std::find(charsets.begin(), charsets.end(), charset) == charsets.end()) {
+				throw std::invalid_argument("Invalid charset: " + charset);
+			}
+			args.charset = charset;
 		}
 
 		// color

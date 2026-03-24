@@ -1,9 +1,14 @@
-#include "ASCIIConverter.h"
+﻿#include "ASCIIConverter.h"
 
 // Predefined character sets used for ASCII conversion
 // Characters are ordered from darkest to lightest
 const std::unordered_map<std::string, std::string> ASCIIConverter::charsets = {
-	{"default", "@%#*+=-:. "}
+	{"default", "@%#*+=-:. "},
+    {"detailed", "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\" ^ `'."},
+    {"alpha", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"},
+    {"num", "0896532471"},
+    {"minimalist", "#+-."},
+    {"alnum", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0896532471abcderghijklmnopqrstuvwxyz"}
 };
 
 // Constructor
@@ -72,6 +77,20 @@ std::string ASCIIConverter::convert(const std::string& charsetName, bool color) 
         result += '\n';
 	}
 	return result;
+}
+
+std::ostream& ASCIIConverter::getOutputStream(const std::string& filename)
+{
+    static std::ofstream file;
+    if (filename.empty()) {
+        return std::cout;
+    }
+
+    file.open(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+    return file;
 }
 
 // Prints the ASCII result to the given output stream
