@@ -26,9 +26,17 @@ public:
 	* @param argv - argument values
 	* @return an Argument structure with all values set
 	* 
-	* @throws std::invalid_argument if an invalid argument is found
+	* @throw std::invalid_argument if an invalid argument is found
 	*/
 	static Arguments parse(int argc, char** argv);
+
+	/**
+	* handles interactive mode
+	* 
+	* @param args - command line arguments 
+	*				that will be modified during the interactive mode
+	*/
+	void runInteractive(Arguments& args);
 
 private:
 	/**
@@ -39,6 +47,22 @@ private:
 	*/
 	static bool isFlag(const std::string& arg);
 
+	/**
+	* Parses input commands in interactive mode
+	* 
+	* @param line - input line
+	* @param args - current arguments that should be modified by new command
+	* 
+	* @throw std::invalid_argument if an invalid command is found
+	*/
+	void parseInteractive(const std::string& line, Arguments& args);
+
 	/// data folder path prefix
 	static const std::string dataPrefix;
+
+	/// valid character set titles
+	static const std::vector<std::string> charsets;
+
+	/// valid filters
+	static const std::vector<std::string> filters;
 };
