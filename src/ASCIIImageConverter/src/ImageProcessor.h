@@ -2,6 +2,7 @@
 
 #include "Image.h"
 #include "ArgsParser.h"
+#include "Arguments.h"
 #include <string>
 #include <cmath>
 
@@ -15,6 +16,8 @@ public:
 	explicit ImageProcessor(Image& img);
 
 	Image processArgs(const Arguments& args);
+
+	Image processInteractive(const InteractiveCommand& cmd);
 
 	/**
 	* Resizes an image to the specified width, height is computed automatically

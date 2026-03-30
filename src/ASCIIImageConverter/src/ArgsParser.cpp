@@ -1,6 +1,7 @@
 #include "ArgsParser.h"
 
 #include <string>
+#include <sstream>
 #include <stdexcept>
 #include <cstdlib>
 
@@ -19,10 +20,11 @@ bool ArgsParser::isFlag(const std::string& arg) {
 	return arg.rfind("--", 0) == 0;
 }
 
-void ArgsParser::parseInteractive(const std::string& line, Arguments& args)
+InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Arguments& args)
 {
 	std::istringstream iss(line);
 	std::string value;
+	std::string cmd;
 	iss >> cmd;
 
 	/// width
@@ -38,6 +40,7 @@ void ArgsParser::parseInteractive(const std::string& line, Arguments& args)
 				}
 				else {
 					args.width = temp;
+					return { cmd, value };
 				}
 			}
 			catch (const std::exception& e) {
@@ -53,11 +56,12 @@ void ArgsParser::parseInteractive(const std::string& line, Arguments& args)
 		}
 		else {
 			try {
-				float temp = std::stoi(value);
-				args.brightness = temp;
+				float temp = std::stof(value);
+				args.brightness += temp;
+				return { cmd, value };
 			}
 			catch (const std::exception&) {
-				throw std::invalid_argument("--brightness value must be a number");
+				throw std::invalid_argument("brightness value must be a number");
 			}
 		}
 	}
@@ -69,10 +73,12 @@ void ArgsParser::parseInteractive(const std::string& line, Arguments& args)
 		}
 		else {
 			try {
-				float temp = std::stoi(value);
+				float temp = std::stof(value);
 				if (temp < 0.0f) {
 					throw std::invalid_argument("contrast value must be non negative");
 				}
+				args.contrast += temp;
+				return { cmd, value };
 			}
 			catch (const std::exception&) {
 				throw std::invalid_argument("contrast value must be a number");
@@ -90,6 +96,7 @@ void ArgsParser::parseInteractive(const std::string& line, Arguments& args)
 				throw std::invalid_argument("invalid filter: " + value);
 			}
 			args.filters.push_back(value);
+			return { cmd, value };
 		}
 	}
 
@@ -103,6 +110,7 @@ void ArgsParser::parseInteractive(const std::string& line, Arguments& args)
 				throw std::invalid_argument("invalid charset: " + value);
 			}
 			args.charset = value;
+			return { cmd, value };
 		}
 	}
 
@@ -121,6 +129,7 @@ void ArgsParser::parseInteractive(const std::string& line, Arguments& args)
 			else {
 				throw std::invalid_argument("color requires a boolean value");
 			}
+			return { cmd, value };
 		}
 	}
 
@@ -130,6 +139,12 @@ void ArgsParser::parseInteractive(const std::string& line, Arguments& args)
 			throw std::invalid_argument("please specify the output filename");
 		}
 		args.outputFile = value;
+		return { cmd, value };
+	}
+
+	///	undo/redo
+	else if (cmd == "undo" || cmd == "redo") {
+		return { cmd, "" };
 	}
 
 	/// invalid
@@ -182,7 +197,7 @@ Arguments ArgsParser::parse(int argc, char** argv) {
 				throw std::invalid_argument("--brightness requires a value");
 			}
 			try {
-				args.brightness = std::stoi(argv[++i]);
+				args.brightness = std::stof(argv[++i]);
 			}
 			catch (const std::exception&) {
 				throw std::invalid_argument("--brightness value must be a number");
@@ -251,25 +266,9 @@ Arguments ArgsParser::parse(int argc, char** argv) {
 
 		/// invalid 
 		else {
-			throw std::invalid_argument("Unknown parameter: " + current);
+			throw std::invalid_argument("unknown parameter: " + current);
 		}
 	}
 
 	return args;
-}
-
-void ArgsParser::runInteractive(Arguments& args)
-{
-	std::cout << "Running interactive mode. Type 'exit' to quit." << std::endl;
-
-	std::string line;
-	while (line != "exit") {
-		std::getline(std::cin, line);
-		try {
-			parseInteractive(line, args);
-		}
-		catch(const std::exception& e){
-			std::cout << "Error: " << e.what() << std::endl;
-		}
-	}
 }

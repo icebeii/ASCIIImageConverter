@@ -10,7 +10,8 @@ add_executable(ascii_converter
  "ArgsParser.cpp" "ArgsParser.h"
  "ImageLoader.cpp" "ImageLoader.h"
  "ImageProcessor.cpp" "ImageProcessor.h"
- "ASCIIConverter.cpp" "ASCIIConverter.h")
+ "ASCIIConverter.cpp" "ASCIIConverter.h"
+ "InteractiveSession.h" "InteractiveSession.cpp")
 
 target_include_directories(ascii_converter PRIVATE
     ${PROJECT_SOURCE_DIR}/../../libs

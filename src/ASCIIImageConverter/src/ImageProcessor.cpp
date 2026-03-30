@@ -34,6 +34,39 @@ Image ImageProcessor::processArgs(const Arguments& args) {
 	return image;
 }
 
+Image ImageProcessor::processInteractive(const InteractiveCommand& cmd) {
+	if (cmd.name == "width") {
+		int value = std::stoi(cmd.value);
+		image = resize(image, value);
+	}
+	else if (cmd.name == "brightness") {
+		float value = std::stof(cmd.value);
+		image = adjustBrightness(image, value);
+	}
+	else if (cmd.name == "contrast") {
+		float value = std::stof(cmd.value);
+		image = adjustContrast(image, value);
+	}
+	else if (cmd.name == "filter") {
+		if (cmd.value == "invert") {
+			image = invert(image);
+		}
+		else if (cmd.value == "sepia") {
+			image = sepia(image);
+		}
+		else if (cmd.value == "blur") {
+			image = blur(image);
+		}
+		else if (cmd.value == "sharpen") {
+			image = sharpen(image);
+		}
+		else if (cmd.value == "edges") {
+			image = detectEdges(image);
+		}
+	}
+	return image;
+}
+
 // Returns a reference to the image
 Image& ImageProcessor::getImage() {
 	return image;
