@@ -40,6 +40,9 @@ private:
 	/// data folder path prefix
 	static const std::string dataPrefix;
 
+	/// represents the console output
+	static const std::string cout;
+
 	/// valid character set titles
 	static const std::vector<std::string> charsets;
 

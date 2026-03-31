@@ -13,7 +13,7 @@ public:
 	* Constructor that takes a reference to an Image object
 	* The processor will operate directly on this image
 	*/
-	explicit ImageProcessor(Image& img);
+	explicit ImageProcessor(const Image& img);
 
 	Image processArgs(const Arguments& args);
 
@@ -86,12 +86,8 @@ public:
 	*/
 	Image detectEdges(const Image& img);
 
-	/// Returns a reference to the processed image
-	Image& getImage();
-
 private:
-	/// Reference to the image
-	Image& image;	
+	Image image;	
 
 	Image grayscale(const Image& img);
 
@@ -130,6 +126,10 @@ private:
 	* @return  a vector with suppressed edge magnitudes
 	*/
 	std::vector<float> suppress(const std::vector<float>& magnitude, const std::vector<float>& direction, int width, int height);
+
+	std::vector<int> buildHistogram(const std::vector<float>& data, int bins, float& minValue, float& maxValue);
+	float otsu(const std::vector<int>& histogram);
+	float calculateThreshold(const std::vector<float>& magnitude);
 
 	/**
 	* Applies hysteresis thresholding to detect final edges

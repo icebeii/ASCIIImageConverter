@@ -4,10 +4,11 @@
 InteractiveSession::InteractiveSession(const Image& img, const Arguments& initial) : original(img), current(img)
 {
 	history.push_back(initial);
-	ImageProcessor processor(original);
+	ImageProcessor processor(img);
 	current = processor.processArgs(initial);
 }
 
+/// Hnadles interactive mode
 void InteractiveSession::run()
 {
 	std::cout << "Running interactive mode. Type 'exit' to quit." << std::endl;
@@ -25,13 +26,15 @@ void InteractiveSession::run()
 			InteractiveCommand cmd = parser.parseInteractive(line, args);
 			apply(cmd);
 
-			history.resize(idx + 1);
-			history.push_back(args);
-			idx++;
+			if (cmd.name != "undo" && cmd.name != "redo") {
+				history.resize(idx + 1);
+				history.push_back(args);
+				idx++;
+			}
 
 			ASCIIConverter converter(current);
-			std::string result = converter.convert(args.charset, args.color);
-			std::ostream& out = converter.getOutputStream(args.outputFile);
+			std::string result = converter.convert(history[idx].charset, history[idx].color);
+			std::ostream& out = converter.getOutputStream(history[idx].outputFile);
 			converter.print(result, out);
 		}
 		catch (const std::exception& e) {
@@ -40,6 +43,7 @@ void InteractiveSession::run()
 	}
 }
 
+/// Applies the interactive command
 void InteractiveSession::apply(const InteractiveCommand & cmd)
 {
 	if (cmd.name == "color" || cmd.name == "charset" || cmd.name == "output") {
@@ -78,6 +82,7 @@ void InteractiveSession::redo() {
 }
 
 void InteractiveSession::rebuild() {
-	ImageProcessor processor(original);
+	Image temp = original;
+	ImageProcessor processor(temp);
 	current = processor.processArgs(history[idx]);
 }

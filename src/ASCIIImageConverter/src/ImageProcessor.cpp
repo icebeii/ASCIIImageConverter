@@ -1,7 +1,8 @@
 #include "ImageProcessor.h"
+#include <float.h>
 
 // Constructor 
-ImageProcessor::ImageProcessor(Image& img) : image(img) {}
+ImageProcessor::ImageProcessor(const Image& img) : image(img) {}
 
 Image ImageProcessor::processArgs(const Arguments& args) {
 	if (args.width > 0) {
@@ -29,6 +30,9 @@ Image ImageProcessor::processArgs(const Arguments& args) {
 		}
 		else if (filter == "edges") {
 			image = detectEdges(image);
+		}
+		else if (filter == "grayscale") {
+			image = grayscale(image);
 		}
 	}
 	return image;
@@ -63,12 +67,10 @@ Image ImageProcessor::processInteractive(const InteractiveCommand& cmd) {
 		else if (cmd.value == "edges") {
 			image = detectEdges(image);
 		}
+		else if (cmd.value == "grayscale") {
+			image = grayscale(image);
+		}
 	}
-	return image;
-}
-
-// Returns a reference to the image
-Image& ImageProcessor::getImage() {
 	return image;
 }
 
@@ -235,6 +237,74 @@ std::vector<float> ImageProcessor::suppress(const std::vector<float>& magnitude,
 	return result;
 }
 
+std::vector<int> ImageProcessor::buildHistogram(const std::vector<float>& data, int bins, float& minValue, float& maxValue) {
+	std::vector<int> histogram(bins, 0);
+	minValue = FLT_MAX;
+	maxValue = FLT_MIN;
+	for (float v : data) {
+		if (v >= 0.0f) {
+			minValue = std::min(minValue, v);
+			maxValue = std::max(maxValue, v);
+		}
+	}
+
+	if (maxValue == minValue) {
+		return histogram;
+	}
+	for (float v : data) {
+		if (v > 0.0f) {
+			int bin = (int)((v - minValue) / (maxValue - minValue) * (bins - 1));
+			histogram[bin]++;
+		}
+	}
+	return histogram;
+}
+
+float ImageProcessor::otsu(const std::vector<int>& histogram) {
+	int top = histogram.size();
+	int total = 0;
+	for (int h : histogram) {
+		total += h;
+	}
+
+	float sumB = 0.0f;
+	int wB = 0;
+	int level = 0;
+	float maximum = 0.0f;
+	float sum1 = 0.0f;
+	for (int i = 0; i < top; i++) {
+		sum1 += i * histogram[i];
+	}
+
+	for (int j = 0; j < top; j++) {
+		wB += histogram[j];
+		int wF = total - wB;
+		sumB += j * histogram[j];
+
+		if (wB > 0 && wF > 0) {
+			float mB = sumB / wB;
+			float mF = (sum1 - sumB) / wF;
+			float value = (float)wB * wF * (mB - mF) * (mB - mF);
+
+			if (value >= maximum) {
+				level = j;
+				maximum = value;
+			}
+		}
+	}
+	return level;
+}
+
+float ImageProcessor::calculateThreshold(const std::vector<float>& magnitude) {
+	float minValue;
+	float maxValue;
+	int bins = 256;
+	std::vector<int> histogram = buildHistogram(magnitude, bins, minValue, maxValue);
+	int level = otsu(histogram);
+	float threshold = minValue + (float(level) / (bins - 1)) * (maxValue - minValue);
+	return threshold;
+}
+
 // Hysteresis thresholding
 // Weak edges are kept only if connected to strong ones
 Image ImageProcessor::hysteresis(const std::vector<float>& magnitude, int width, int height)
@@ -245,8 +315,8 @@ Image ImageProcessor::hysteresis(const std::vector<float>& magnitude, int width,
 	result.pixels.resize(width * height);
 
 	// Threshold values
-	float low = 30.0f;
-	float high = 100.0f;
+	float high = calculateThreshold(magnitude);
+	float low = high * 0.5f;
 
 	std::vector<int> state(width * height, 0); // 0 - non-edge, 1 - weak, 2 - strong
 

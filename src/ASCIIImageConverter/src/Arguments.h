@@ -13,10 +13,11 @@ struct Arguments {
 	std::string charset = "default";	/// Character set for output
 	bool color = false;					/// Flag to enable color output
 	bool interactive = false;			/// Flag to enable interactive mode
-	std::string outputFile;				/// Output file name
+	std::string outputFile = "";		/// Output file name
 };
 
+/// Structure to store a single interactive command
 struct InteractiveCommand {
-	std::string name;
-	std::string value;
+	std::string name;		/// name of the command
+	std::string value;		/// corresponding value if needed
 };

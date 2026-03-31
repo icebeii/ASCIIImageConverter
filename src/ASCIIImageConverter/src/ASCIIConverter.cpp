@@ -85,6 +85,9 @@ std::ostream& ASCIIConverter::getOutputStream(const std::string& filename)
     if (filename.empty()) {
         return std::cout;
     }
+    if (file.is_open()) {
+        file.close();
+    }
 
     file.open(filename);
     if (!file.is_open()) {

@@ -7,12 +7,14 @@
 
 const std::string ArgsParser::dataPrefix = "DATADIR";
 
+const std::string ArgsParser::cout = "STDCOUT";
+
 const std::vector<std::string> ArgsParser::charsets = {
 		"default", "detailed", "alpha", "num", "minimalist", "alnum"
 };
 
 const std::vector<std::string> ArgsParser::filters = {
-	"invert", "sepia", "blur", "sharpen", "edges"
+	"invert", "grayscale", "sepia", "blur", "sharpen", "edges"
 };
 
 // Returns true if an argument starts with "--"
@@ -77,7 +79,7 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 				if (temp < 0.0f) {
 					throw std::invalid_argument("contrast value must be non negative");
 				}
-				args.contrast += temp;
+				args.contrast *= temp;
 				return { cmd, value };
 			}
 			catch (const std::exception&) {
@@ -117,17 +119,17 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 	/// color 
 	else if (cmd == "color") {
 		if (!(iss >> value)) {
-			throw std::invalid_argument("color requires a boolean value");
+			throw std::invalid_argument("color requires an on/off parameter");
 		}
 		else {
-			if (value == "true") {
+			if (value == "on") {
 				args.color = true;
 			}
-			else if (value == "false") {
+			else if (value == "off") {
 				args.color = false;
 			}
 			else {
-				throw std::invalid_argument("color requires a boolean value");
+				throw std::invalid_argument("color requires an on/off parameter");
 			}
 			return { cmd, value };
 		}
@@ -136,7 +138,10 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 	/// output
 	else if (cmd == "output") {
 		if (!(iss >> value)) {
-			throw std::invalid_argument("please specify the output filename");
+			throw std::invalid_argument("please specify the output filename or \"" + cout + "\" for console output");
+		}
+		if (value == cout) {
+			value = "";
 		}
 		args.outputFile = value;
 		return { cmd, value };
@@ -259,9 +264,13 @@ Arguments ArgsParser::parse(int argc, char** argv) {
 		/// output file
 		else if (current == "--output") {
 			if ((i + 1) >= argc) {
-				throw std::invalid_argument("--output requires a value");
+				throw std::invalid_argument("--output requires an output filename or \"" + cout + "\" for console output");
 			}
-			args.outputFile = argv[++i];
+			std::string filename = argv[++i];
+			if (filename == cout) {
+				filename = "";
+			}
+			args.outputFile = filename;
 		}
 
 		/// invalid 
