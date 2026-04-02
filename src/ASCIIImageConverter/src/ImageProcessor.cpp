@@ -237,6 +237,7 @@ std::vector<float> ImageProcessor::suppress(const std::vector<float>& magnitude,
 	return result;
 }
 
+/// Builds histogram
 std::vector<int> ImageProcessor::buildHistogram(const std::vector<float>& data, int bins, float& minValue, float& maxValue) {
 	std::vector<int> histogram(bins, 0);
 	minValue = FLT_MAX;
@@ -260,7 +261,8 @@ std::vector<int> ImageProcessor::buildHistogram(const std::vector<float>& data, 
 	return histogram;
 }
 
-float ImageProcessor::otsu(const std::vector<int>& histogram) {
+/// Otsu method 
+int ImageProcessor::otsu(const std::vector<int>& histogram) {
 	int top = histogram.size();
 	int total = 0;
 	for (int h : histogram) {
@@ -295,6 +297,7 @@ float ImageProcessor::otsu(const std::vector<int>& histogram) {
 	return level;
 }
 
+/// Find optimal threshold
 float ImageProcessor::calculateThreshold(const std::vector<float>& magnitude) {
 	float minValue;
 	float maxValue;
@@ -423,7 +426,7 @@ Image ImageProcessor::resize(const Image& img, int newWidth)
 		}
 	}
 	return result;
-}
+} 
 
 // Creates a negative version of an image by inverting each color channel
 Image ImageProcessor::invert(const Image& img)

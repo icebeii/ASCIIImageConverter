@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
         /// Print output
         ASCIIConverter converter(newImg);
-        std::string res = converter.convert(args.charset, args.color);
+        std::string res = converter.convert(args);
         std::ostream& out = converter.getOutputStream(args.outputFile);
         converter.print(res, out);
 

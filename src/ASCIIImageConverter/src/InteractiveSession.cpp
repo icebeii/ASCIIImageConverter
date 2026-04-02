@@ -33,7 +33,7 @@ void InteractiveSession::run()
 			}
 
 			ASCIIConverter converter(current);
-			std::string result = converter.convert(history[idx].charset, history[idx].color);
+			std::string result = converter.convert(history[idx]);
 			std::ostream& out = converter.getOutputStream(history[idx].outputFile);
 			converter.print(result, out);
 		}

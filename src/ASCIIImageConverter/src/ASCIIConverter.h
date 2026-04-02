@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Image.h"
+#include "Arguments.h"
 #include <string>
 #include <ostream>
 #include <fstream>
@@ -19,11 +20,10 @@ public:
 	/**
 	* Converts an image to an ASCII string using the specified character set
 	* 
-	* @param charsetName - name of the character set used for conversion
-	* @param color - if true, ANSI color codes will be added 
+	* @param args - input Arguments
 	* @return a string containing an ASCII representation of the image
 	*/
-	std::string convert(const std::string& charsetName, bool color) const;
+	std::string convert(const Arguments& args) const;
 
 	/**
 	* Get the output stream depending on the argument

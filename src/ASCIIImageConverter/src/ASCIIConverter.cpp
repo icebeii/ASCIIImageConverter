@@ -15,13 +15,13 @@ const std::unordered_map<std::string, std::string> ASCIIConverter::charsets = {
 ASCIIConverter::ASCIIConverter(const Image& img) : image(img){}
 
 // Converts an image to ASCII string, adding ANSI codes if color is true
-std::string ASCIIConverter::convert(const std::string& charsetName, bool color) const {
+std::string ASCIIConverter::convert(const Arguments& args) const {
     // Size of one block of pixels that will be reprsesented by one ASCII character
 	const int blockWidth = 4;
 	const int blockHeight = 8;
 	std::string result;
 
-    std::string charset = getCharset(charsetName);
+    std::string charset = getCharset(args.charset);
 
     // Iterate over an image in blocks
 	for (int y = 0; y < image.height; y += blockHeight) {
@@ -62,7 +62,7 @@ std::string ASCIIConverter::convert(const std::string& charsetName, bool color) 
             int index = avgGray * (charset.size() - 1) / 255;
             char asciiChar = charset[index];
 
-            if (color) {
+            if (args.color && args.outputFile == "") {
                 result += "\033[38;2;";
                 result += std::to_string(avgR) + ";";
                 result += std::to_string(avgG) + ";";
@@ -82,16 +82,22 @@ std::string ASCIIConverter::convert(const std::string& charsetName, bool color) 
 std::ostream& ASCIIConverter::getOutputStream(const std::string& filename)
 {
     static std::ofstream file;
+    static std::string current;
+
     if (filename.empty()) {
         return std::cout;
     }
-    if (file.is_open()) {
-        file.close();
-    }
 
-    file.open(filename);
-    if (!file.is_open()) {
-        throw std::runtime_error("Failed to open file: " + filename);
+    if (!file.is_open() || current != filename) {
+        if (file.is_open()) {
+            file.close();
+        }
+
+        file.open(filename);
+        if (!file.is_open()) {
+            throw std::runtime_error("Failed to open file: " + filename);
+        }
+        current = filename;
     }
     return file;
 }
@@ -99,6 +105,7 @@ std::ostream& ASCIIConverter::getOutputStream(const std::string& filename)
 // Prints the ASCII result to the given output stream
 void ASCIIConverter::print(const std::string& result, std::ostream& out) const {
     out << result;
+    out.flush();
 }
 
 // Returns the character set for the given name

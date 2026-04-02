@@ -27,6 +27,7 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 	std::istringstream iss(line);
 	std::string value;
 	std::string cmd;
+	std::string extra;
 	iss >> cmd;
 
 	/// width
@@ -42,7 +43,6 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 				}
 				else {
 					args.width = temp;
-					return { cmd, value };
 				}
 			}
 			catch (const std::exception& e) {
@@ -60,7 +60,6 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 			try {
 				float temp = std::stof(value);
 				args.brightness += temp;
-				return { cmd, value };
 			}
 			catch (const std::exception&) {
 				throw std::invalid_argument("brightness value must be a number");
@@ -80,7 +79,6 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 					throw std::invalid_argument("contrast value must be non negative");
 				}
 				args.contrast *= temp;
-				return { cmd, value };
 			}
 			catch (const std::exception&) {
 				throw std::invalid_argument("contrast value must be a number");
@@ -98,7 +96,6 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 				throw std::invalid_argument("invalid filter: " + value);
 			}
 			args.filters.push_back(value);
-			return { cmd, value };
 		}
 	}
 
@@ -112,7 +109,6 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 				throw std::invalid_argument("invalid charset: " + value);
 			}
 			args.charset = value;
-			return { cmd, value };
 		}
 	}
 
@@ -131,7 +127,6 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 			else {
 				throw std::invalid_argument("color requires an on/off parameter");
 			}
-			return { cmd, value };
 		}
 	}
 
@@ -144,7 +139,6 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 			value = "";
 		}
 		args.outputFile = value;
-		return { cmd, value };
 	}
 
 	///	undo/redo
@@ -156,6 +150,11 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 	else {
 		throw std::invalid_argument("unknown command: " + cmd);
 	}
+	 
+	if (iss >> extra) {
+		throw std::invalid_argument("too many arguments for command: " + cmd);
+	}
+	return { cmd, value };
 }
 
 /// Parses command-line arguments and returns an Argument struct

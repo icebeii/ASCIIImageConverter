@@ -15,30 +15,53 @@ public:
 	*/
 	explicit ImageProcessor(const Image& img);
 
+	/**
+	* Processes Arguments and applies corresponging changes
+	* 
+	* @param args - input arguments
+	* @return processed image
+	*/
 	Image processArgs(const Arguments& args);
 
+	/**
+	* Processes an interactive command and changes the image
+	* 
+	* @param cmd - input command
+	* @return processed image
+	*/
 	Image processInteractive(const InteractiveCommand& cmd);
+
+private:
+	Image image;	
+
+	/**
+	* Transforms an image to grayscale
+	* 
+	* @param img - input image
+	* @return corrected image
+	*/
+	Image grayscale(const Image& img);
 
 	/**
 	* Resizes an image to the specified width, height is computed automatically
-	* 
+	*
 	* @param img - input image
 	* @param newWidth - new width in pixels
-	* @retutn a resized image
+	* @return a resized image
 	*/
 	Image resize(const Image& img, int newWidth);
 
 	/**
 	* Inverts all RGB color channels
-	* 
+	*
 	* @param img - input image
-	* @retutn a negative image
+	* @return a negative image
 	*/
 	Image invert(const Image& img);
 
 	/**
 	* Applies a sepia tone effect using a standart sepia color transform
-	* 
+	*
 	* @param img - input image
 	* @return an image with sepia color filter
 	*/
@@ -46,7 +69,7 @@ public:
 
 	/**
 	* Applies a Gaussian blur effect to the image
-	* 
+	*
 	* @param img - input image
 	* @return a blurred image
 	*/
@@ -54,7 +77,7 @@ public:
 
 	/**
 	* Applies a sharpening effect to the image
-	* 
+	*
 	* @param img - input image
 	* @return a sharpened image
 	*/
@@ -62,7 +85,7 @@ public:
 
 	/**
 	* Adjusts image brightness
-	* 
+	*
 	* @param img - input image
 	* @param factor > 0 to increase, factor < 0 to decrease
 	* @return corrected image
@@ -71,7 +94,7 @@ public:
 
 	/**
 	* Adjusts image contrast
-	* 
+	*
 	* @param img - input image
 	* @param factor > 1 to increase, 0 < factor < 1 to decrease
 	* @return corrected image
@@ -80,16 +103,11 @@ public:
 
 	/**
 	* Detects edges using Canny algorithm
-	* 
+	*
 	* @param img - input image
-	* @return black image with white edges 
+	* @return black image with white edges
 	*/
 	Image detectEdges(const Image& img);
-
-private:
-	Image image;	
-
-	Image grayscale(const Image& img);
 
 	/**
 	* Calculates sum of kernel elements
@@ -127,8 +145,30 @@ private:
 	*/
 	std::vector<float> suppress(const std::vector<float>& magnitude, const std::vector<float>& direction, int width, int height);
 
+	/**
+	* Builds histogram representing the distribution of gradient magnitudes
+	* 
+	* @param data - input array of values
+	* @param bins -	number of histogram bins
+	* @param minValue, maxValue - output min and max values in data
+	* @return histogram as vector of bin counts
+	*/
 	std::vector<int> buildHistogram(const std::vector<float>& data, int bins, float& minValue, float& maxValue);
-	float otsu(const std::vector<int>& histogram);
+
+	/**
+	* Calculates optimal threshold
+	* 
+	* @param histogram - input histogram
+	* @return bin index with optimal threshold level
+	*/
+	int otsu(const std::vector<int>& histogram);
+
+	/**
+	* Calculates threshold value for edge detection
+	* 
+	* @param magnitude - gradient magnitudes
+	* @return threshold value
+	*/
 	float calculateThreshold(const std::vector<float>& magnitude);
 
 	/**
