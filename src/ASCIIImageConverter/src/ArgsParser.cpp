@@ -4,6 +4,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <cstdlib>
+#include <algorithm>
 
 const std::string ArgsParser::dataPrefix = "DATADIR";
 
