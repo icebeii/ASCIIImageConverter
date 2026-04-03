@@ -243,7 +243,7 @@ std::vector<int> ImageProcessor::buildHistogram(const std::vector<float>& data, 
 	minValue = FLT_MAX;
 	maxValue = FLT_MIN;
 	for (float v : data) {
-		if (v >= 0.0f) {
+		if (v > 0.0f) {
 			minValue = std::min(minValue, v);
 			maxValue = std::max(maxValue, v);
 		}
