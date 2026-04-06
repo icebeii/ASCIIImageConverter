@@ -136,7 +136,7 @@ Třída zodpovědná za zpracování obrazu.
 
 Funkce `processArgs` aplikuje všechny změny definované vstupní strukturou `Arguments`.
 Funkce `processInteractive` aplikuje pouze jednu změnu určenou strukturou `InteractiveCommand`.
-Funkce `resize` používá bilineární interpolaci ke změně velikosti obrázku. Nový pixel je interpolací 4 sousedních pixelů
+Funkce `resize` používá bilineární interpolaci ke změně velikosti obrázku. Nový pixel je interpolací 4 sousedních pixelů.
 Funkce `applyKernel` implementuje konvoluci jádra 3x3, t.j. každý pixel je vážený součet sousedních pixelů.
 
 ##### Edge detection
@@ -168,7 +168,7 @@ Funkce `print` poté zobrazí skutečný výsledek.
 #### InteractiveSession
 Zajišťuje interaktivní režim programu. 
 Atribut `original` obsahuje původní obraz, který slouží jako výchozí stav pro případné přepočítání. 
-`current` reprezentuje aktuální stav obrazu po aplikaci všech dosavadních operací. 
+`current` reprezentuje aktuální stav obrazu po aplikaci všech předchozích operací. 
 Pro podporu funkcí `undo` a `redo` je použit vektor `history`, který ukládá posloupnost struktur `Arguments`, tedy jednotlivé konfigurace úprav. 
 Proměnná `idx` určuje aktuální pozici v této historii a tím i aktuální stav obrazu.
 Funkce `run` opakovaně načítá vstup od uživatele, dokud není zadán příkaz `exit`. 
