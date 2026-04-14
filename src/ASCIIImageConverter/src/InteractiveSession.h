@@ -2,11 +2,16 @@
 
 #include "Arguments.h"
 #include "ImageProcessor.h"
+#include <memory>
 
 class InteractiveSession {
 public:
-	/// Constructor
-	InteractiveSession(const Image& img, const Arguments& initial);
+	/** Constructor
+	* 
+	* @param img - initial image
+	* @param initial - initial arguments state
+	*/
+	InteractiveSession(const IImage& img, const Arguments& initial);
 
 	/**
 	* Handles interactive mode
@@ -14,10 +19,10 @@ public:
 	void run();
 
 private:
-	const Image original;			/// Original image
-	Image current;					/// Current image
-	std::vector<Arguments> history; /// Sequence of changes applied to the image
-	int idx = 0;					/// Current position in history
+	std::unique_ptr<IImage> original;			/// Original image
+	std::unique_ptr<IImage> current;			/// Current image
+	std::vector<Arguments> history;				/// Sequence of changes applied to the image
+	int idx = 0;								/// Current position in history
 
 	/**
 	* Applies changes entered by interactive command to the current image

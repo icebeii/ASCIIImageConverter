@@ -5,15 +5,40 @@
 #include "Arguments.h"
 #include <string>
 #include <cmath>
+#include <memory>
+
+/// Interface for image processing pipelines
+class IImageProcessor {
+public: 
+	virtual ~IImageProcessor() = default;
+
+	/**
+	* Applies a full set of arguments to an image
+	* 
+	* @param args - processing parameters
+	* @return new processed image 
+	*/
+	virtual std::unique_ptr<IImage> processArgs(const Arguments& args) = 0;
+
+	/**
+	* Applies a single interactive command
+	* 
+	* @param cmd - command to apply
+	* @return new processed image 
+	*/
+	virtual std::unique_ptr<IImage> processInteractive(const InteractiveCommand& cmd) = 0;
+};
 
 /// Class responsible for processing and modifiying an image
-class ImageProcessor {
+class ImageProcessor : public IImageProcessor{
 public:
 	/**
-	* Constructor that takes a reference to an Image object
-	* The processor will operate directly on this image
+	* Constructor 
+	* 
+	* @param img - source image which will be cloned
+	*	Image copy is stored internaly and the original image is not modified
 	*/
-	explicit ImageProcessor(const Image& img);
+	explicit ImageProcessor(const IImage& img);
 
 	/**
 	* Processes Arguments and applies corresponging changes
@@ -21,7 +46,7 @@ public:
 	* @param args - input arguments
 	* @return processed image
 	*/
-	Image processArgs(const Arguments& args);
+	std::unique_ptr<IImage> processArgs(const Arguments& args) override;
 
 	/**
 	* Processes an interactive command and changes the image
@@ -29,18 +54,18 @@ public:
 	* @param cmd - input command
 	* @return processed image
 	*/
-	Image processInteractive(const InteractiveCommand& cmd);
+	std::unique_ptr<IImage> processInteractive(const InteractiveCommand& cmd) override;
 
 private:
-	Image image;	
+	std::unique_ptr<IImage> image;
 
 	/**
 	* Transforms an image to grayscale
 	* 
 	* @param img - input image
-	* @return corrected image
+	* @return a grayscale image
 	*/
-	Image grayscale(const Image& img);
+	std::unique_ptr<IImage> grayscale(const IImage& img);
 
 	/**
 	* Resizes an image to the specified width, height is computed automatically
@@ -49,7 +74,7 @@ private:
 	* @param newWidth - new width in pixels
 	* @return a resized image
 	*/
-	Image resize(const Image& img, int newWidth);
+	std::unique_ptr<IImage> resize(const IImage& img, int newWidth);
 
 	/**
 	* Inverts all RGB color channels
@@ -57,7 +82,7 @@ private:
 	* @param img - input image
 	* @return a negative image
 	*/
-	Image invert(const Image& img);
+	std::unique_ptr<IImage> invert(const IImage& img);
 
 	/**
 	* Applies a sepia tone effect using a standart sepia color transform
@@ -65,7 +90,7 @@ private:
 	* @param img - input image
 	* @return an image with sepia color filter
 	*/
-	Image sepia(const Image& img);
+	std::unique_ptr<IImage> sepia(const IImage& img);
 
 	/**
 	* Applies a Gaussian blur effect to the image
@@ -73,7 +98,7 @@ private:
 	* @param img - input image
 	* @return a blurred image
 	*/
-	Image blur(const Image& img);
+	std::unique_ptr<IImage> blur(const IImage& img);
 
 	/**
 	* Applies a sharpening effect to the image
@@ -81,7 +106,7 @@ private:
 	* @param img - input image
 	* @return a sharpened image
 	*/
-	Image sharpen(const Image& img);
+	std::unique_ptr<IImage> sharpen(const IImage& img);
 
 	/**
 	* Adjusts image brightness
@@ -90,7 +115,7 @@ private:
 	* @param factor > 0 to increase, factor < 0 to decrease
 	* @return corrected image
 	*/
-	Image adjustBrightness(const Image& img, float factor);
+	std::unique_ptr<IImage> adjustBrightness(const IImage& img, float factor);
 
 	/**
 	* Adjusts image contrast
@@ -99,15 +124,15 @@ private:
 	* @param factor > 1 to increase, 0 < factor < 1 to decrease
 	* @return corrected image
 	*/
-	Image adjustContrast(const Image& img, float factor);
+	std::unique_ptr<IImage> adjustContrast(const IImage& img, float factor);
 
 	/**
 	* Detects edges using Canny algorithm
 	*
 	* @param img - input image
-	* @return black image with white edges
+	* @return binary edge image
 	*/
-	Image detectEdges(const Image& img);
+	std::unique_ptr<IImage> detectEdges(const IImage& img);
 
 	/**
 	* Calculates sum of kernel elements
@@ -124,7 +149,7 @@ private:
 	* @param kernel - 2D vector which represents the filter matrix
 	* @return an iamge after applying the kernel
 	*/
-	Image applyKernel(const Image& img, const std::vector<std::vector<int>>& kernel);
+	std::unique_ptr<IImage> applyKernel(const IImage& img, const std::vector<std::vector<int>>& kernel);
 
 	/**
 	* Computes gradient magnitude and direction using Sobel operators
@@ -133,7 +158,7 @@ private:
 	* @param magnitude - output vectors of gradient strengths
 	* @param direction - output vector of gradient angles in radians
 	*/
-	void computeGradient(const Image& img, std::vector<float>& magnitude, std::vector<float>& direction);
+	void computeGradient(const IImage& img, std::vector<float>& magnitude, std::vector<float>& direction);
 
 	/**
 	* Performs non-maximum suppression
@@ -178,5 +203,5 @@ private:
 	* @param width, height - image dimensions
 	* @return a binary image with detected edges
 	*/
-	Image hysteresis(const std::vector<float>& magnitude, int width, int height);
+	std::unique_ptr<IImage> hysteresis(const IImage& img, const std::vector<float>& magnitude);
 };

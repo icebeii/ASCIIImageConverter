@@ -1,5 +1,12 @@
 ﻿#include "ASCIIConverter.h"
 
+constexpr int BLOCK_WIDTH = 4;
+constexpr int BLOCK_HEIGHT = 8;
+constexpr double RED_WEIGHT = 0.3;
+constexpr double GREEN_WEIGHT = 0.59;
+constexpr double BLUE_WEIGHT = 0.11;
+constexpr int MAX_BRIGHTNESS = 255;
+
 // Predefined character sets used for ASCII conversion
 // Characters are ordered from darkest to lightest
 const std::unordered_map<std::string, std::string> ASCIIConverter::charsets = {
@@ -12,20 +19,22 @@ const std::unordered_map<std::string, std::string> ASCIIConverter::charsets = {
 };
 
 // Constructor
-ASCIIConverter::ASCIIConverter(const Image& img) : image(img){}
+ASCIIConverter::ASCIIConverter(const IImage& img) : image(img){}
 
 // Converts an image to ASCII string, adding ANSI codes if color is true
 std::string ASCIIConverter::convert(const Arguments& args) const {
     // Size of one block of pixels that will be reprsesented by one ASCII character
-	const int blockWidth = 4;
-	const int blockHeight = 8;
+	const int blockWidth = BLOCK_WIDTH;
+	const int blockHeight = BLOCK_HEIGHT;
 	std::string result;
 
     std::string charset = getCharset(args.charset);
+    int width = image.getWidth();
+    int height = image.getHeight();
 
     // Iterate over an image in blocks
-	for (int y = 0; y < image.height; y += blockHeight) {
-		for (int x = 0; x < image.width; x += blockWidth) {
+	for (int y = 0; y < height; y += blockHeight) {
+		for (int x = 0; x < width; x += blockWidth) {
 
             int sumGray = 0;
             int sumR = 0;
@@ -41,11 +50,12 @@ std::string ASCIIConverter::convert(const Arguments& args) const {
                     int px = x + dx;
                     int py = y + dy;
                     
-                    if (px >= image.width || py >= image.height) {
+                    if (px >= width || py >= height) {
                         continue;
                     }
-                    const RGB& p = image.pixels[py * image.width + px];
-                    int gray = 0.3 * p.r + 0.59 * p.g + 0.11 * p.b; // Luminosity method
+                    const auto& pixels = image.getPixels();
+                    const RGB& p = pixels[py * width + px];
+                    int gray = RED_WEIGHT * p.r + GREEN_WEIGHT * p.g + BLUE_WEIGHT * p.b; // Luminosity method
                     sumGray += gray;
                     sumR += p.r;
                     sumG += p.g;
@@ -59,7 +69,7 @@ std::string ASCIIConverter::convert(const Arguments& args) const {
             int avgG = sumG / count;
             int avgB = sumB / count;
 
-            int index = avgGray * (charset.size() - 1) / 255;
+            int index = avgGray * (charset.size() - 1) / MAX_BRIGHTNESS;
             char asciiChar = charset[index];
 
             if (args.color && args.outputFile == "") {
@@ -118,7 +128,7 @@ const std::string ASCIIConverter::getCharset(const std::string& title)
         return value;
     }
     else {
-        throw new std::runtime_error("Invalid charset");
+        throw std::runtime_error("Invalid charset");
     }
 }
 

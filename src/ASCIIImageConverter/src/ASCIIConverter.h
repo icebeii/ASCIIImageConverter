@@ -12,10 +12,11 @@
 class ASCIIConverter {
 public:
 	/** 
-	* Constructor that takes a reference to an Image object
-	* The image will be used as the source for ASCII conversion
+	* Constructor
+	* 
+	* @param img - source image which is used as read-only reference
 	*/
-	explicit ASCIIConverter(const Image& img);
+	explicit ASCIIConverter(const IImage& img);
 
 	/**
 	* Converts an image to an ASCII string using the specified character set
@@ -30,7 +31,7 @@ public:
 	* 
 	* @param filename - empty if standart output should be used,
 	*					otherwise is filename
-	* @returns output stream
+	* @return reference to output stream
 	* 
 	* @throw  std::runtime_error if output file cannot be opened
 	*/
@@ -46,7 +47,7 @@ public:
 
 private:
 	/// Reference to the source image
-	const Image& image;
+	const IImage& image;
 
 	/**
 	* Unordered map containing predefined character sets for ASCII conversion

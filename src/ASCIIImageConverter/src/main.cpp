@@ -20,17 +20,17 @@ int main(int argc, char** argv)
 
         /// Apply changes
         ImageProcessor processor(image);
-        Image newImg = processor.processArgs(args);
+        std::unique_ptr<IImage> newImg = processor.processArgs(args);
 
         /// Print output
-        ASCIIConverter converter(newImg);
+        ASCIIConverter converter(*newImg);
         std::string res = converter.convert(args);
         std::ostream& out = converter.getOutputStream(args.outputFile);
         converter.print(res, out);
 
         /// Start interactive mode
         if (args.interactive) {
-            InteractiveSession session(image, args);
+            InteractiveSession session(*newImg, args);
             session.run();
         }
     }

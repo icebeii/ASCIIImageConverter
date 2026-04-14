@@ -1,10 +1,12 @@
 #include "InteractiveSession.h"
 #include "ASCIIConverter.h"
 
-InteractiveSession::InteractiveSession(const Image& img, const Arguments& initial) : original(img), current(img)
+InteractiveSession::InteractiveSession(const IImage& img, const Arguments& initial)
 {
+	original = img.clone();
+	current = img.clone();
 	history.push_back(initial);
-	ImageProcessor processor(img);
+	ImageProcessor processor(*current);
 	current = processor.processArgs(initial);
 }
 
@@ -32,7 +34,7 @@ void InteractiveSession::run()
 				idx++;
 			}
 
-			ASCIIConverter converter(current);
+			ASCIIConverter converter(*current);
 			std::string result = converter.convert(history[idx]);
 			std::ostream& out = converter.getOutputStream(history[idx].outputFile);
 			converter.print(result, out);
@@ -56,7 +58,7 @@ void InteractiveSession::apply(const InteractiveCommand & cmd)
 		redo();
 	}
 	else {
-		ImageProcessor processor(current);
+		ImageProcessor processor(*current);
 		current = processor.processInteractive(cmd);
 	}
 }
@@ -82,7 +84,6 @@ void InteractiveSession::redo() {
 }
 
 void InteractiveSession::rebuild() {
-	Image temp = original;
-	ImageProcessor processor(temp);
+	ImageProcessor processor(*original);
 	current = processor.processArgs(history[idx]);
 }

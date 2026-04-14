@@ -6,6 +6,9 @@
 #include <cstdlib>
 #include <algorithm>
 
+constexpr int MIN_ARGS_COUNT = 2;
+constexpr int INPUT_FILE_IDX = 1;
+
 const std::string ArgsParser::dataPrefix = "DATADIR";
 
 const std::string ArgsParser::cout = "STDCOUT";
@@ -144,7 +147,7 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 
 	///	undo/redo
 	else if (cmd == "undo" || cmd == "redo") {
-		return { cmd, "" };
+		value = "";
 	}
 
 	/// invalid
@@ -160,12 +163,12 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 
 /// Parses command-line arguments and returns an Argument struct
 Arguments ArgsParser::parse(int argc, char** argv) {
-	if (argc < 2) {
+	if (argc < MIN_ARGS_COUNT) {
 		throw std::invalid_argument("No input file specified");
 	}
 
 	Arguments args;	
-	std::string inputPath = argv[1];	/// The first argument is the input file
+	std::string inputPath = argv[INPUT_FILE_IDX];	/// The first argument is the input file
 	if (inputPath.rfind(dataPrefix, 0) == 0) {
 		args.inputFile = std::string(DATA_DIR) + "/" + inputPath.substr(dataPrefix.size());
 	}
@@ -174,7 +177,7 @@ Arguments ArgsParser::parse(int argc, char** argv) {
 	}
 
 	/// Handle other arguments
-	for (int i = 2; i < argc; i++) {
+	for (int i = INPUT_FILE_IDX + 1; i < argc; i++) {
 		std::string current = argv[i];
 		if (!isFlag(current)) {
 			throw std::invalid_argument("Unexpected argument: " + current);
