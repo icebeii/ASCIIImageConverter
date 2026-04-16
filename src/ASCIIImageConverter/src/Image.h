@@ -73,7 +73,7 @@ public:
 		return std::make_unique<Image>(*this);
 	}
 
-	std::unique_ptr<IImage> Image::create(int width, int height) const {
+	std::unique_ptr<IImage> create(int width, int height) const {
 		auto img = std::make_unique<Image>();
 		img->width = width;
 		img->height = height;
