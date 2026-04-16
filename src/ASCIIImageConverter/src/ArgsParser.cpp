@@ -50,7 +50,7 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 				}
 			}
 			catch (const std::exception& e) {
-				throw std::invalid_argument("width value must be an integer");
+				throw std::invalid_argument("width value must be a positive integer");
 			}
 		}
 	}
@@ -85,7 +85,7 @@ InteractiveCommand ArgsParser::parseInteractive(const std::string& line, Argumen
 				args.contrast *= temp;
 			}
 			catch (const std::exception&) {
-				throw std::invalid_argument("contrast value must be a number");
+				throw std::invalid_argument("contrast value must be a positive number");
 			}
 		}
 	}

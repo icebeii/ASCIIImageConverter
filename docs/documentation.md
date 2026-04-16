@@ -33,8 +33,10 @@ První argument je vždy cesta ke vstupnímu obrázku.
 Složka `project/src/data/` obsahuje několik testovacích obrázků. Pro jejich použití lze zadat předdefinovaný prefix `DATADIR`.
 **Příklad:**
 ```
-./run_windows.bat DATADIR/street.jpg
+./run_windows.bat DATADIR/cameraman.jpg
 ```
+
+![Run example](run_example.png)
 
 ##### Podporované argumenty:
 * `--width <hodnota>`: změní velikost obrázku. Šířka bude nastavena na zadaný počet pixelů a výška bude vypočítána automaticky.
@@ -42,6 +44,8 @@ Složka `project/src/data/` obsahuje několik testovacích obrázků. Pro jejich
 ```
 ./run_windows.bat image.png --width 700
 ```
+
+![Width example](width_example.png)
 
 * `--brightness <hodnota>`: změní jas obrazu. Kladná hodnota jas zvýší, zatímco záporná hodnota jej sníží.
 **Příklad:**
@@ -70,6 +74,8 @@ Lze kombinovat více filtrů.
 ./run_windows.bat image.png --filter invert --filter sepia
 ```
 
+![Filter example](filter_example.png)
+
 * `--set <název>`: definuje znakovou sadu pro výstupní reprezentaci obrázku
 **Možnosti:**
     + `default`
@@ -84,6 +90,8 @@ Lze kombinovat více filtrů.
 ```
 
 * `--color`: pokud je zadán, zapne barevný výstup. Funguje pouze pro standardní výstup
+
+![Color example](color_example.png)
 
 * `--output <název>`: výstup bude zapsán do zadaného souboru
 **Příklad:**
@@ -110,6 +118,8 @@ Po každém zadaném příkazu se zobrazí aktuální výsledek.
 * `redo`: vrátí jednu změnu zrušenou příkazem undo
 * `exit`: ukončit interaktivní režim
 
+![Interactive example](interactive_example.png)
+
 ## Programátorská dokumentace
 
 Program začíná ve funkci `main`, která provádí následující kroky:
@@ -119,20 +129,30 @@ Program začíná ve funkci `main`, která provádí následující kroky:
 4. Převod na ASCII
 5. Volitelně spuštění interaktivního režimu
 
+### UML diagram tříd
+![Diagram](arch.svg)
+
 #### ArgsParser
 Je zodpovědný za parsování argumentů příkazového řádku a příkazů interaktivního režimu a také validuje vstup.
 Vrací objekt struktury `Arguments` nebo `InteractiveCommand` pro interaktivní režim.
 Také používá seznamy podporovaných názvů filtrů a znakových sad pro ověření vstupu.
 
-#### Image a RGB
+#### IImage, Image a RGB
+Rozhraní `IImage` definuje abstraktní reprezentaci obrázku. Umožňuje přístup k pixelům a rozměrům obrázku, vytvoření kopie a nového obrázku.
+
 `RGB` je struktura reprezentující jeden pixel. Obsahuje červenou, modrou a zelenou složku.
-`Image` je třída reprezentující obrázek. Tato třída ukládá šířku a výšku obrázku v pixelech, počet kanálů a pole pixelů (`RGB`), které tvoří obrázek.
+
+`Image` je třída reprezentující obrázek. Implementuje rozhraní IImage. Tato třída ukládá šířku a výšku obrázku v pixelech, počet kanálů a pole pixelů (`RGB`), které tvoří obrázek.
 
 #### ImageLoader
 Používá `stb_image` pro načítání obrázků. Funkce `loadFromFile` vrací objekt třídy `Image` nebo vyvolá výjimku, pokud zadaný obrázek nelze otevřít.
 
-#### ImageProcessor 
-Třída zodpovědná za zpracování obrazu. 
+#### IImageProcessor a ImageProcessor 
+`IImageProcessor` je rozhraní definující zpracování obrazu. Obsahuje metody:
+`processArgs`: aplikuje kompletní sadu operací
+`processInteractive`: aplikuje jeden interaktivní příkaz
+
+`ImageProcessor` je třída zodpovědná za zpracování obrazu. Implementuje rozhraní `IImageProcessor`.
 
 Funkce `processArgs` aplikuje všechny změny definované vstupní strukturou `Arguments`.
 Funkce `processInteractive` aplikuje pouze jednu změnu určenou strukturou `InteractiveCommand`.
