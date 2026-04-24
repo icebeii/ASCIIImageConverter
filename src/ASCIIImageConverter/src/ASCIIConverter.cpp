@@ -98,17 +98,15 @@ std::ostream& ASCIIConverter::getOutputStream(const std::string& filename)
         return std::cout;
     }
 
-    if (!file.is_open() || current != filename) {
-        if (file.is_open()) {
-            file.close();
-        }
-
-        file.open(filename);
-        if (!file.is_open()) {
-            throw std::runtime_error("Failed to open file: " + filename);
-        }
-        current = filename;
+    if (file.is_open()) {
+        file.close();
     }
+
+    file.open(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+    current = filename;
     return file;
 }
 
